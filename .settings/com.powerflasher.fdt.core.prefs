@@ -1,4 +1,4 @@
-#Mon Nov 29 20:10:25 CET 2010
+#Mon Nov 29 20:23:55 CET 2010
 com.powerflasher.fdt.core.CompatiblePlayers=External_SWF_Viewer\:Browser\:AIR_Debug_Launcher
 com.powerflasher.fdt.core.CompilerArguments=-target-player\={playerVersion}\n-library-path+\="{flexSDK}/frameworks/locale/en_US"\n-default-size\=550,400
 com.powerflasher.fdt.core.DefaultOutputFolder=bin
@@ -12,4 +12,5 @@ com.powerflasher.fdt.core.PlayerVersion=10
 com.powerflasher.fdt.core.ProjectTypeHint=Flex 4 AIR
 com.powerflasher.fdt.core.Runtime=AIR
 com.powerflasher.fdt.core.SdkName=Flex 4.1
+com.powerflasher.fdt.core.useProjectFormatterSettings=true
 eclipse.preferences.version=1
