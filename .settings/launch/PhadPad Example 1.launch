@@ -5,7 +5,7 @@
 <stringAttribute key="ARGUMENTS" value=""/>
 <booleanAttribute key="KILL_PREVIUOS_VIEWER" value="true"/>
 <stringAttribute key="LAUNCHER_DEPENDENCIES" value="[Self]"/>
-<stringAttribute key="MAIN_CLASS" value="src/com/britzpetermann/phadpad/example/PhadPad1.mxml"/>
+<stringAttribute key="MAIN_CLASS" value="src_example/example1/PhadPad1.mxml"/>
 <stringAttribute key="OUTPUT" value="bin/PhadPad1.swf"/>
 <booleanAttribute key="PASS_CP" value="true"/>
 <booleanAttribute key="PASS_MAIN_CLASS" value="true"/>

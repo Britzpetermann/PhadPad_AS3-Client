@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication
+	xmlns:fx="http://ns.adobe.com/mxml/2009"
+	xmlns:s="library://ns.adobe.com/flex/spark"
+	xmlns:mx="library://ns.adobe.com/flex/mx"
+	creationComplete="init()"
+	xmlns:example1="example1.*">
+
+	<fx:Script>
+		<![CDATA[
+			import mx.printing.PrintAdvancedDataGrid;
+
+			[Bindable]
+			private var phadpadFacade : PhadpadFacade;
+
+			private function init() : void
+			{
+				phadpadFacade = new PhadpadFacade();
+				phadpadFacade.sprite = sprite;
+				phadpadFacade.init();
+			}
+		]]>
+	</fx:Script>
+
+	<s:VGroup
+		width="100%"
+		height="100%">
+		<s:HGroup>
+			<s:TextInput
+				text="@{phadpadFacade.phadpadAddress}"/>
+
+			<mx:Button
+				label="Connect"
+				click="phadpadFacade.connect()"/>
+
+			<mx:Button
+				label="Send Image"
+				click="phadpadFacade.sendImage()"/>
+		</s:HGroup>
+
+		<s:SpriteVisualElement
+			id="sprite"
+			width="100%"
+			height="100%"
+			alpha="0.3">
+		</s:SpriteVisualElement>
+	</s:VGroup>
+
+	<s:HGroup
+		width="100%"
+		height="100%"
+		horizontalAlign="center">
+		<s:VGroup
+			width="250"
+			height="100%"
+			verticalAlign="middle">
+
+			<example1:AccelerationSlider
+				acceleration="{phadpadFacade.accelerationX}"/>
+
+			<example1:AccelerationSlider
+				acceleration="{phadpadFacade.accelerationY}"/>
+
+			<example1:AccelerationSlider
+				acceleration="{phadpadFacade.accelerationZ}"/>
+
+		</s:VGroup>
+	</s:HGroup>
+
+</s:WindowedApplication>

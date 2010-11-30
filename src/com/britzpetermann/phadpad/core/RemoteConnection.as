@@ -84,7 +84,7 @@ package com.britzpetermann.phadpad.core
 
 		private function getData(event : TimerEvent) : void
 		{
-			if (socket.connected)
+			if (socket!= null && socket.connected)
 				handleData(null);
 		}
 
