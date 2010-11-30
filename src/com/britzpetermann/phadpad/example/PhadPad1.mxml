@@ -4,4 +4,6 @@
 	xmlns:s="library://ns.adobe.com/flex/spark"
 	xmlns:mx="library://ns.adobe.com/flex/mx">
 
+	<s:TextInput/>
+	
 </s:WindowedApplication>
