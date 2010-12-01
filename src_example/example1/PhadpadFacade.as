@@ -56,7 +56,7 @@ package example1
 //			remoteConnection.catchErrors(loaderInfo);
 			remoteConnection.setInput(commandProcessor);
 
-			bitmapData = new BitmapData(1024, 768, true, 0);
+			bitmapData = new BitmapData(1024, 768, true, 0xffffffff);
 			sprite.addChild(new Bitmap(bitmapData));
 		}
 
