@@ -1,6 +1,9 @@
 package example1
 {
 
+	import mx.controls.Alert;
+	import flash.display.LoaderInfo;
+
 	import com.britzpetermann.phadpad.command.AccelerationCommand;
 	import com.britzpetermann.phadpad.command.AccelerationEvent;
 	import com.britzpetermann.phadpad.command.Touch;
@@ -22,19 +25,20 @@ package example1
 	public class PhadpadFacade
 	{
 		[Bindable]
-		public var phadpadAddress : String = "192.168.2.106";
+		public var phadpadAddress : String = "192.168.2.110";
 
 		[Bindable]
 		public var isConnected : Boolean = false;
 
 		[Bindable]
-		public var accelerationX : Number;
+		public var accelerationX : Number = 0;
 		[Bindable]
-		public var accelerationY : Number;
+		public var accelerationY : Number = 0;
 		[Bindable]
-		public var accelerationZ : Number;
+		public var accelerationZ : Number = 0;
 
 		public var sprite : Sprite;
+		public var loaderInfo : LoaderInfo;
 
 		private var commandProcessor : CommandProcessor;
 		private var remoteConnection : RemoteConnection;
@@ -49,6 +53,7 @@ package example1
 			commandProcessor.addCommand(5, new AccelerationCommand().listen(handleAcceleration));
 
 			remoteConnection = new RemoteConnection();
+//			remoteConnection.catchErrors(loaderInfo);
 			remoteConnection.setInput(commandProcessor);
 
 			bitmapData = new BitmapData(1024, 768, true, 0);
@@ -63,9 +68,16 @@ package example1
 
 		public function sendImage() : void
 		{
-			var bytes : ByteArray = bitmapData.getPixels(new Rectangle(0, 0, 1024, 768));
-			remoteConnection.socket.writeBytes(bytes, 0, bytes.length);
-			remoteConnection.socket.flush();
+			if (remoteConnection.socket != null && remoteConnection.socket.connected)
+			{
+				var bytes : ByteArray = bitmapData.getPixels(new Rectangle(0, 0, 1024, 768));
+				remoteConnection.socket.writeBytes(bytes, 0, bytes.length);
+				remoteConnection.socket.flush();
+			}
+			else
+			{
+				Alert.show("You are not connected...", "Cound not send image!");
+			}
 		}
 
 		private function handleTouchBegin(event : TouchEvent) : void
@@ -92,8 +104,8 @@ package example1
 
 		private function drawTouch(touch : Touch, radius : Number) : void
 		{
-			var x : Number = touch.x * sprite.width;
-			var y : Number = touch.y * sprite.height;
+			var x : Number = touch.x * 1024;
+			var y : Number = touch.y * 768;
 
 			var brush : Shape = new Shape();
 			brush.graphics.lineStyle(3, touch.id);

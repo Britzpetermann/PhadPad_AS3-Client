@@ -18,7 +18,7 @@
 <stringAttribute key="PROJECT_NAME" value="PhadPad_AS3-Client"/>
 <stringAttribute key="PUBLISHER_ID" value=""/>
 <booleanAttribute key="START_SWF_ENABLED" value="true"/>
-<stringAttribute key="START_SWF_LOCATION" value="bin/index.html"/>
+<stringAttribute key="START_SWF_LOCATION" value="http://localhost:8080/PhadPad_AS3-Client/bin/"/>
 <stringAttribute key="START_SWF_WITH" value="Browser"/>
 <booleanAttribute key="USE_PROJECT_COMPILER_ARGUMENTS" value="true"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">

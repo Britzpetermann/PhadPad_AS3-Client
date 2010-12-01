@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<s:WindowedApplication
+<s:Application
 	xmlns:fx="http://ns.adobe.com/mxml/2009"
 	xmlns:s="library://ns.adobe.com/flex/spark"
 	xmlns:mx="library://ns.adobe.com/flex/mx"
-	creationComplete="init()"
+	addedToStage="init()"
 	xmlns:example1="example1.*">
 
 	<fx:Script>
 		<![CDATA[
-			import mx.printing.PrintAdvancedDataGrid;
 
 			[Bindable]
 			private var phadpadFacade : PhadpadFacade;
@@ -16,6 +15,7 @@
 			private function init() : void
 			{
 				phadpadFacade = new PhadpadFacade();
+				phadpadFacade.loaderInfo = stage.loaderInfo;
 				phadpadFacade.sprite = sprite;
 				phadpadFacade.init();
 			}
@@ -24,18 +24,28 @@
 
 	<s:VGroup
 		width="100%"
-		height="100%">
+		height="100%"
+		gap="10"
+		paddingLeft="10"
+		paddingTop="10"
+		>
+		<s:Label
+			text="Start PhädPäd and enter the displayed IP address below. Then hit 'Connect' and touch and move the PhädPäd."/>
+
 		<s:HGroup>
 			<s:TextInput
-				text="@{phadpadFacade.phadpadAddress}"/>
+				text="@{phadpadFacade.phadpadAddress}"
+				toolTip="IP address of PhädPäd"/>
 
 			<mx:Button
 				label="Connect"
-				click="phadpadFacade.connect()"/>
+				click="phadpadFacade.connect()"
+				toolTip="Connect to PhädPäd..."/>
 
 			<mx:Button
 				label="Send Image"
-				click="phadpadFacade.sendImage()"/>
+				click="phadpadFacade.sendImage()"
+				toolTip="Send current stage image to PhädPäd"/>
 		</s:HGroup>
 
 		<s:SpriteVisualElement
@@ -67,4 +77,4 @@
 		</s:VGroup>
 	</s:HGroup>
 
-</s:WindowedApplication>
+</s:Application>
