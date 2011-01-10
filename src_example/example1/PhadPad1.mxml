@@ -8,6 +8,7 @@
 
 	<fx:Script>
 		<![CDATA[
+			import com.britzpetermann.phadpad.core.RemoteConnectionEvent;
 
 			[Bindable]
 			private var phadpadFacade : PhadpadFacade;
@@ -15,9 +16,53 @@
 			private function init() : void
 			{
 				phadpadFacade = new PhadpadFacade();
-				phadpadFacade.loaderInfo = stage.loaderInfo;
 				phadpadFacade.sprite = sprite;
 				phadpadFacade.init();
+
+				phadpadFacade.remoteConnection.addEventListener(RemoteConnectionEvent.START, handleConnectionStart);
+				phadpadFacade.remoteConnection.addEventListener(RemoteConnectionEvent.CONNECT, handleConnectionConnect);
+				phadpadFacade.remoteConnection.addEventListener(RemoteConnectionEvent.DISCONNECT, handleConnectionDisconnect);
+				phadpadFacade.remoteConnection.addEventListener(RemoteConnectionEvent.CONNECT_ERROR, handleConnectionError);
+				phadpadFacade.remoteConnection.addEventListener(RemoteConnectionEvent.WAIT_AND_RECONNECT, handleWaitAndReconnect);
+				phadpadFacade.remoteConnection.addEventListener(RemoteConnectionEvent.CLOSE, handleConnectionClosed);
+
+				statusText.appendText(getTime() + "Status:\n");
+				statusText.appendText(getTime() + "Waiting for you to hit \"Connect\" button...\n");
+			}
+
+			private function handleConnectionClosed(event : RemoteConnectionEvent) : void
+			{
+				statusText.appendText(getTime() + "Connection was closed.\n");
+			}
+
+			private function handleWaitAndReconnect(event : RemoteConnectionEvent) : void
+			{
+				statusText.appendText(getTime() + "I try to reconnect in some seconds. Please wait...\n");
+			}
+
+			private function handleConnectionError(event : RemoteConnectionEvent) : void
+			{
+				statusText.appendText(getTime() + "Connection error.\n");
+			}
+
+			private function handleConnectionStart(event : RemoteConnectionEvent) : void
+			{
+				statusText.appendText(getTime() + "Continuously trying to connect to " + addressInput.text + " at port 4446.\n");
+			}
+
+			private function handleConnectionConnect(event : RemoteConnectionEvent) : void
+			{
+				statusText.appendText(getTime() + "I am trying to connect. Please wait...\n");
+			}
+
+			private function handleConnectionDisconnect(event : RemoteConnectionEvent) : void
+			{
+				statusText.appendText(getTime() + "Stop connection or connecting.\n");
+			}
+
+			private function getTime() : String
+			{
+				return "[" + new Date().getTime() + "] ";
 			}
 		]]>
 	</fx:Script>
@@ -27,22 +72,35 @@
 		height="100%"
 		gap="10"
 		paddingLeft="10"
-		paddingTop="10"
-		>
+		paddingRight="10"
+		paddingTop="10">
 		<s:Label
 			text="Start PhädPäd and enter the displayed IP address below. Then hit 'Connect' and touch and move the PhädPäd."/>
 
+		<s:TextArea
+			width="100%"
+			id="statusText"/>
+
 		<s:HGroup>
 			<s:TextInput
+				id="addressInput"
 				text="@{phadpadFacade.phadpadAddress}"
 				toolTip="IP address of PhädPäd"/>
 
 			<mx:Button
+				enabled="{!phadpadFacade.remoteConnection.isConnectedOrConnecting}"
 				label="Connect"
 				click="phadpadFacade.connect()"
 				toolTip="Connect to PhädPäd..."/>
 
 			<mx:Button
+				enabled="{phadpadFacade.remoteConnection.isConnectedOrConnecting}"
+				label="Abort Connection"
+				click="phadpadFacade.disconnect()"
+				toolTip="Abort connection or connecting to PhädPäd..."/>
+
+			<mx:Button
+				enabled="{phadpadFacade.remoteConnection.isConnected}"
 				label="Send Image"
 				click="phadpadFacade.sendImage()"
 				toolTip="Send current stage image to PhädPäd"/>

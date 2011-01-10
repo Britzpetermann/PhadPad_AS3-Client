@@ -28,20 +28,20 @@ package example1
 		public var phadpadAddress : String = "192.168.2.110";
 
 		[Bindable]
-		public var isConnected : Boolean = false;
-
-		[Bindable]
 		public var accelerationX : Number = 0;
+		
 		[Bindable]
 		public var accelerationY : Number = 0;
+		
 		[Bindable]
 		public var accelerationZ : Number = 0;
 
+		[Bindable]
+		public var remoteConnection : RemoteConnection;
+		
 		public var sprite : Sprite;
-		public var loaderInfo : LoaderInfo;
 
 		private var commandProcessor : CommandProcessor;
-		private var remoteConnection : RemoteConnection;
 		private var bitmapData : BitmapData;
 
 		public function init() : void
@@ -53,7 +53,6 @@ package example1
 			commandProcessor.addCommand(5, new AccelerationCommand().listen(handleAcceleration));
 
 			remoteConnection = new RemoteConnection();
-//			remoteConnection.catchErrors(loaderInfo);
 			remoteConnection.setInput(commandProcessor);
 
 			bitmapData = new BitmapData(1024, 768, true, 0xffffffff);
@@ -64,6 +63,11 @@ package example1
 		{
 			remoteConnection.inputId = 0;
 			remoteConnection.connect(phadpadAddress, 4446);
+		}
+
+		public function disconnect() : void
+		{
+			remoteConnection.disconnect();
 		}
 
 		public function sendImage() : void

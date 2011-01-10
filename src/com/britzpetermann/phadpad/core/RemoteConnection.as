@@ -1,21 +1,33 @@
 package com.britzpetermann.phadpad.core
 {
-	import flash.display.LoaderInfo;
 	import flash.events.Event;
+	import flash.events.EventDispatcher;
 	import flash.events.IOErrorEvent;
 	import flash.events.ProgressEvent;
 	import flash.events.SecurityErrorEvent;
 	import flash.events.TimerEvent;
-	import flash.events.UncaughtErrorEvent;
 	import flash.net.Socket;
 	import flash.utils.ByteArray;
 	import flash.utils.Endian;
 	import flash.utils.Timer;
-	import flash.utils.setTimeout;
 
-	public class RemoteConnection
+	[Event(name="start", type="com.britzpetermann.phadpad.core.RemoteConnectionEvent")]
+	[Event(name="connect", type="com.britzpetermann.phadpad.core.RemoteConnectionEvent")]
+	[Event(name="disconnect", type="com.britzpetermann.phadpad.core.RemoteConnectionEvent")]
+	[Event(name="connectError", type="com.britzpetermann.phadpad.core.RemoteConnectionEvent")]
+	[Event(name="waitAndReconnect", type="com.britzpetermann.phadpad.core.RemoteConnectionEvent")]
+	[Event(name="close", type="com.britzpetermann.phadpad.core.RemoteConnectionEvent")]
+	public class RemoteConnection extends EventDispatcher
 	{
 		public static const RECONNECT_TIME : Number = 3000;
+
+		[Bindable]
+		public var isConnected : Boolean = false;
+
+		[Bindable]
+		public var isConnectedOrConnecting : Boolean = false;
+
+		public var oldSockets : Vector.<Socket> = new Vector.<Socket>();
 
 		public var socket : Socket;
 		public var inputId : int;
@@ -24,12 +36,22 @@ package com.britzpetermann.phadpad.core
 		private var location : String;
 		private var port : int;
 		private var timer : Timer;
+		private var reconnectTimer : Timer;
 
 		public function RemoteConnection()
 		{
 			timer = new Timer(0);
 			timer.addEventListener(TimerEvent.TIMER, getData);
 			timer.start();
+
+			reconnectTimer = new Timer(RECONNECT_TIME, 0);
+			reconnectTimer.addEventListener(TimerEvent.TIMER, handleReconnectTimer);
+		}
+
+		private function handleReconnectTimer(event : TimerEvent) : void
+		{
+			reconnectTimer.stop();
+			reconnect();
 		}
 
 		public function setInput(remoteInput : CommandProcessor) : void
@@ -37,14 +59,13 @@ package com.britzpetermann.phadpad.core
 			this.remoteInput = remoteInput;
 		}
 
-		public function catchErrors(loaderInfo : LoaderInfo) : void
-		{
-			loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, handleUncaughtErrors);
-		}
-
 		public function connect(location : String, port : int) : void
 		{
 			trace("Try to connect...", inputId);
+
+			dispatchEvent(new RemoteConnectionEvent(RemoteConnectionEvent.START));
+
+			isConnectedOrConnecting = true;
 
 			this.port = port;
 			this.location = location;
@@ -52,11 +73,23 @@ package com.britzpetermann.phadpad.core
 			reconnect();
 		}
 
-		private function reconnect() : void
+		public function disconnect() : void
 		{
-			trace("reconnect", inputId);
+			isConnected = false;
+			isConnectedOrConnecting = false;
+
+			reconnectTimer.stop();
+
+			dismissSocket();
+			removeSocket();
+			dispatchEvent(new RemoteConnectionEvent(RemoteConnectionEvent.DISCONNECT));
+		}
+
+		private function removeSocket() : void
+		{
 			if (socket != null)
 			{
+
 				if (socket.connected)
 					socket.close();
 
@@ -64,11 +97,22 @@ package com.britzpetermann.phadpad.core
 				socket.removeEventListener(Event.CLOSE, handleClose);
 				socket.removeEventListener(IOErrorEvent.IO_ERROR, handleError);
 				socket.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, handleSecurityError);
+
+				socket = null;
 			}
+		}
+
+		private function reconnect() : void
+		{
+			dispatchEvent(new RemoteConnectionEvent(RemoteConnectionEvent.CONNECT));
+			trace("reconnect", inputId);
+
+			removeSocket();
 
 			try
 			{
 				socket = new Socket();
+				socket.timeout = 1000;
 				socket.endian = Endian.LITTLE_ENDIAN;
 				socket.addEventListener(Event.CONNECT, handleConnect);
 				socket.addEventListener(Event.CLOSE, handleClose);
@@ -78,13 +122,20 @@ package com.britzpetermann.phadpad.core
 			}
 			catch(error : Error)
 			{
-				setTimeout(reconnect, RECONNECT_TIME);
+				waitAndReconnect();
 			}
+		}
+
+		private function waitAndReconnect() : void
+		{
+			dispatchEvent(new RemoteConnectionEvent(RemoteConnectionEvent.WAIT_AND_RECONNECT));
+			reconnectTimer.reset();
+			reconnectTimer.start();
 		}
 
 		private function getData(event : TimerEvent) : void
 		{
-			if (socket!= null && socket.connected)
+			if (socket != null && socket.connected)
 				handleData(null);
 		}
 
@@ -112,33 +163,54 @@ package com.britzpetermann.phadpad.core
 
 		private function handleError(event : IOErrorEvent) : void
 		{
-			// trace("Could not connect to ", event.text);
+			trace("io error...");
 
-			setTimeout(reconnect, RECONNECT_TIME);
+			dismissSocket();
+
+			dispatchEvent(new RemoteConnectionEvent(RemoteConnectionEvent.CONNECT_ERROR));
+			waitAndReconnect();
+		}
+
+		private function dismissSocket() : void
+		{
+			socket.removeEventListener(IOErrorEvent.IO_ERROR, handleError);
+			socket.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, handleSecurityError);
+
+			socket.addEventListener(IOErrorEvent.IO_ERROR, handleDismissedIOError);
+			socket.addEventListener(SecurityErrorEvent.SECURITY_ERROR, handleDismissedSecurityError);
+
+			oldSockets.push(socket);
+		}
+
+		private function handleDismissedSecurityError(event : SecurityErrorEvent) : void
+		{
+			trace("handleDismissedSecurityError");
+		}
+
+		private function handleDismissedIOError(event : IOErrorEvent) : void
+		{
+			trace("handleDismissedIOError");
 		}
 
 		private function handleClose(event : Event) : void
 		{
-			reconnect();
+			dispatchEvent(new RemoteConnectionEvent(RemoteConnectionEvent.CLOSE));
+			waitAndReconnect();
 		}
 
 		private function handleSecurityError(event : SecurityErrorEvent) : void
 		{
-			trace("Security Error...", inputId, event.text);
-			setTimeout(reconnect, RECONNECT_TIME);
+			trace("security error...");
+			dismissSocket();
+
+			dispatchEvent(new RemoteConnectionEvent(RemoteConnectionEvent.CONNECT_ERROR));
+			waitAndReconnect();
 		}
 
 		private function handleConnect(event : Event) : void
 		{
 			trace("Connection success!", inputId);
-		}
-
-		private function handleUncaughtErrors(event : UncaughtErrorEvent) : void
-		{
-			if (event.error is SecurityErrorEvent)
-			{
-				event.preventDefault();
-			}
+			isConnected = true;
 		}
 	}
 }
