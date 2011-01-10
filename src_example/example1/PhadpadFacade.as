@@ -25,7 +25,7 @@ package example1
 	public class PhadpadFacade
 	{
 		[Bindable]
-		public var phadpadAddress : String = "192.168.2.110";
+		public var phadpadAddress : String = "192.168.2.106";
 
 		[Bindable]
 		public var accelerationX : Number = 0;

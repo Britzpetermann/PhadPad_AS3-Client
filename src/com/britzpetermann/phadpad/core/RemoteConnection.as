@@ -17,6 +17,7 @@ package com.britzpetermann.phadpad.core
 	[Event(name="connectError", type="com.britzpetermann.phadpad.core.RemoteConnectionEvent")]
 	[Event(name="waitAndReconnect", type="com.britzpetermann.phadpad.core.RemoteConnectionEvent")]
 	[Event(name="close", type="com.britzpetermann.phadpad.core.RemoteConnectionEvent")]
+	[Event(name="connectSuccess", type="com.britzpetermann.phadpad.core.RemoteConnectionEvent")]
 	public class RemoteConnection extends EventDispatcher
 	{
 		public static const RECONNECT_TIME : Number = 3000;
@@ -111,8 +112,9 @@ package com.britzpetermann.phadpad.core
 
 			try
 			{
+				// Security.loadPolicyFile("xmlsocket://" + location + ":" + port);
 				socket = new Socket();
-				socket.timeout = 1000;
+				socket.timeout = 5000;
 				socket.endian = Endian.LITTLE_ENDIAN;
 				socket.addEventListener(Event.CONNECT, handleConnect);
 				socket.addEventListener(Event.CLOSE, handleClose);
@@ -165,6 +167,8 @@ package com.britzpetermann.phadpad.core
 		{
 			trace("io error...");
 
+			isConnected = false;
+
 			dismissSocket();
 
 			dispatchEvent(new RemoteConnectionEvent(RemoteConnectionEvent.CONNECT_ERROR));
@@ -194,15 +198,17 @@ package com.britzpetermann.phadpad.core
 
 		private function handleClose(event : Event) : void
 		{
+			isConnected = false;
 			dispatchEvent(new RemoteConnectionEvent(RemoteConnectionEvent.CLOSE));
 			waitAndReconnect();
 		}
 
 		private function handleSecurityError(event : SecurityErrorEvent) : void
 		{
-			trace("security error...");
+			trace("security error...", event.text);
 			dismissSocket();
 
+			isConnected = false;
 			dispatchEvent(new RemoteConnectionEvent(RemoteConnectionEvent.CONNECT_ERROR));
 			waitAndReconnect();
 		}
@@ -210,6 +216,7 @@ package com.britzpetermann.phadpad.core
 		private function handleConnect(event : Event) : void
 		{
 			trace("Connection success!", inputId);
+			dispatchEvent(new RemoteConnectionEvent(RemoteConnectionEvent.CONNECT_SUCCESS));
 			isConnected = true;
 		}
 	}

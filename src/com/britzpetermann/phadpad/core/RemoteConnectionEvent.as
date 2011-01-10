@@ -10,6 +10,7 @@ package com.britzpetermann.phadpad.core
 		public static const CONNECT_ERROR : String = "connectError";
 		public static const WAIT_AND_RECONNECT : String = "waitAndReconnect";
 		public static const CLOSE : String = "close";
+		public static const CONNECT_SUCCESS : String = "connectSuccess";
 		
 		public function RemoteConnectionEvent(type : String, bubbles : Boolean = false, cancelable : Boolean = false)
 		{

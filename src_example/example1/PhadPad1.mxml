@@ -25,9 +25,15 @@
 				phadpadFacade.remoteConnection.addEventListener(RemoteConnectionEvent.CONNECT_ERROR, handleConnectionError);
 				phadpadFacade.remoteConnection.addEventListener(RemoteConnectionEvent.WAIT_AND_RECONNECT, handleWaitAndReconnect);
 				phadpadFacade.remoteConnection.addEventListener(RemoteConnectionEvent.CLOSE, handleConnectionClosed);
+				phadpadFacade.remoteConnection.addEventListener(RemoteConnectionEvent.CONNECT_SUCCESS, handleConnectSuccess);
 
 				statusText.appendText(getTime() + "Status:\n");
 				statusText.appendText(getTime() + "Waiting for you to hit \"Connect\" button...\n");
+			}
+
+			private function handleConnectSuccess(event : RemoteConnectionEvent) : void
+			{
+				statusText.appendText(getTime() + "Connection success.\n");
 			}
 
 			private function handleConnectionClosed(event : RemoteConnectionEvent) : void
@@ -124,12 +130,15 @@
 			verticalAlign="middle">
 
 			<example1:AccelerationSlider
+				text="X"
 				acceleration="{phadpadFacade.accelerationX}"/>
 
 			<example1:AccelerationSlider
+				text="Y"
 				acceleration="{phadpadFacade.accelerationY}"/>
 
 			<example1:AccelerationSlider
+				text="Z"
 				acceleration="{phadpadFacade.accelerationZ}"/>
 
 		</s:VGroup>
